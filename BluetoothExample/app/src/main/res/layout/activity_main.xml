@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="현재 상태 : "
+                android:textSize="22sp"/>
+            <TextView
+                android:id="@+id/tvBluetoothState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="대기중"
+                android:textSize="22sp"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="허용 유지 시간 : "
+                android:textSize="22sp"/>
+            <TextView
+                android:id="@+id/tvAgreeTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="22sp"/>
+
+        </LinearLayout>
+        <Button
+            android:id="@+id/btnDiscoveryDevice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="기기 검색"/>
+        <Button
+            android:id="@+id/btnCancelDiscoveryDevice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="기기 검색 취소"/>
+        <Button
+            android:id="@+id/btnSearchDevice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="검색 허용"/>
+        <Button
+            android:id="@+id/btnCancelConnect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="연결 끊기"/>
+        <Button
+            android:id="@+id/btnSendData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="데이터 전송하기"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="전송한 데이터 : "
+                android:textSize="22sp"/>
+            <TextView
+                android:id="@+id/tvSendData"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"/>
+
+        </LinearLayout>
+        <Button
+            android:id="@+id/btnReceiveData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="데이터 받기"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="받은 데이터 : "
+                android:textSize="22sp"/>
+            <TextView
+                android:id="@+id/tvReceiveData"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#5D6685"
+            android:layout_marginTop="9.5dp">
+
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="페어링된 기기"
+            android:textSize="22sp"
+            android:layout_marginTop="9.5dp"/>
+        <ListView
+            android:id="@+id/lvPairedDevice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </ListView>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="검색된 기기"/>
+        <ListView
+            android:id="@+id/lvSearchedDevice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </ListView>
+
+    </LinearLayout>
+
+
+
+
+</ScrollView>
