@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div>
+        <p>Simple HTML</p>
+
+        <form onsubmit="window.communicate.get(elements[0].value); return true;">
+            <input id="get" type="text" placeholder="keyword">
+            <button type="submit">Submit</button>
+        </form>
+        <form onsubmit="window.communicate.put(elements[0].value); return true;">
+            <input id="put" type="text" placeholder="keyword">
+            <button type="submit">Submit</button>
+        </form>
+
+    </div>
+</body>
+</html>
