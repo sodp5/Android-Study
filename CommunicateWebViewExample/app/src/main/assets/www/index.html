@@ -1,21 +1,40 @@
-<!DOCTYPE html>
-<html>
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+    <!--<meta charset="UTF-8">-->
+<!--</head>-->
+<!--<body>-->
+    <!--<div>-->
+        <!--<p>Simple HTML</p>-->
+
+        <!--<form onsubmit="window.communicate.get(elements[0].value); return true;">-->
+            <!--<input id="get" type="text" placeholder="keyword">-->
+            <!--<button type="submit">Submit</button>-->
+        <!--</form>-->
+        <!--<form onsubmit="window.communicate.put(elements[0].value); return true;">-->
+            <!--<input id="put" type="text" placeholder="keyword">-->
+            <!--<button type="submit">Submit</button>-->
+        <!--</form>-->
+
+    <!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
 </head>
 <body>
-    <div>
-        <p>Simple HTML</p>
+<script>
+function putData(){
+    alert('start');
+	var result = window.WIZICE.putData( 'keytest01', 'data01');
+	alert( 'result='+ result );
+}
+</script>
 
-        <form onsubmit="window.communicate.get(elements[0].value); return true;">
-            <input id="get" type="text" placeholder="keyword">
-            <button type="submit">Submit</button>
-        </form>
-        <form onsubmit="window.communicate.put(elements[0].value); return true;">
-            <input id="put" type="text" placeholder="keyword">
-            <button type="submit">Submit</button>
-        </form>
+<button  type="button"  onclick="javascript: putData();" > PUT </button>
 
-    </div>
+
 </body>
 </html>

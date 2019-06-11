@@ -24,19 +24,27 @@ public class MainActivity extends AppCompatActivity {
 
         wvWebView.getSettings().setJavaScriptEnabled(true);
 
+//        wvWebView.addJavascriptInterface(new Object() {
+//            @JavascriptInterface
+//            public String get(String keyword) {
+//                Toast.makeText(MainActivity.this, "call get method " + keyword, Toast.LENGTH_SHORT).show();
+//                return "succeed";
+//            }
+//
+//            @JavascriptInterface
+//            public String put(String keyword) {
+//                Toast.makeText(MainActivity.this, "call put method " + keyword, Toast.LENGTH_SHORT).show();
+//                return "succeed";
+//            }
+//        }, "communicate");
+
         wvWebView.addJavascriptInterface(new Object() {
             @JavascriptInterface
-            public String get(String keyword) {
-                Toast.makeText(MainActivity.this, "call get method " + keyword, Toast.LENGTH_SHORT).show();
-                return "succeed";
+            public String putData(String keyword, String data) {
+                String result = keyword + data;
+                return result;
             }
-
-            @JavascriptInterface
-            public String put(String keyword) {
-                Toast.makeText(MainActivity.this, "call put method " + keyword, Toast.LENGTH_SHORT).show();
-                return "succeed";
-            }
-        }, "communicate");
+        }, "WIZICE");
 
         wvWebView.loadUrl("file:///android_asset/www/index.html");
     }
