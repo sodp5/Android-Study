@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div>
+        <p>Simple HTML</p>
+
+        <form onsubmit="window.communicate.put(elements[0].value, elements[0].value); return true;">
+            <input id="put" type="text" placeholder="keyword">
+            <button type="submit">put</button>
+        </form>
+        <form onsubmit="window.communicate.get(elements[0].value); return true;">
+            <input id="get" type="text" placeholder="keyword">
+            <button type="submit">get</button>
+        </form>
+        <form onsubmit="window.communicate.del(elements[0].value); return true;">
+            <input id="del" type="text" placeholder="keyword">
+            <button type="submit">del</button>
+        </form>
+
+        <form onsubmit="window.communicate.scanAccess(); return true;">
+            <input id="a" type="text" placeholder="keyword">
+            <button type="submit">scanAccess</button>
+        </form>
+
+        <form onsubmit="window.communicate.scanDevice(); return true;">
+            <input id="b" type="text" placeholder="keyword">
+            <button type="submit">scanDevice</button>
+        </form>
+
+        <form onsubmit="window.communicate.disconnectDevice(); return true;">
+            <input id="c" type="text" placeholder="keyword">
+            <button type="submit">disconnectDevice</button>
+        </form>
+
+    </div>
+</body>
+</html>
