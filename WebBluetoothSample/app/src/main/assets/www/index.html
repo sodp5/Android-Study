@@ -7,8 +7,9 @@
     <div>
         <p>Simple HTML</p>
 
-        <form onsubmit="window.communicate.put(elements[0].value, elements[0].value); return true;">
+        <form onsubmit="window.communicate.put(elements[0].value, elements[1].value); return true;">
             <input id="put" type="text" placeholder="keyword">
+            <input id="p" type="text" placeholder="keyword">
             <button type="submit">put</button>
         </form>
         <form onsubmit="window.communicate.get(elements[0].value); return true;">
@@ -33,6 +34,16 @@
         <form onsubmit="window.communicate.disconnectDevice(); return true;">
             <input id="c" type="text" placeholder="keyword">
             <button type="submit">disconnectDevice</button>
+        </form>
+
+        <form onsubmit="window.communicate.connectDevice(); return true;">
+            <input id="d" type="text" placeholder="keyword">
+            <button type="submit">connectDevice</button>
+        </form>
+
+        <form onsubmit="window.communicate.getStatus(); return true;">
+            <input id="e" type="text" placeholder="keyword">
+            <button type="submit">getStatus</button>
         </form>
 
     </div>
