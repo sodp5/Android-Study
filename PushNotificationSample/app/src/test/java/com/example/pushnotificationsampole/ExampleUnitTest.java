@@ -1,4 +1,4 @@
-package com.example.pushnotificationsample;
+package com.example.pushnotificationsampole;
 
 import org.junit.Test;
 
