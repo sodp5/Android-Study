@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvConnectState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="not connected"
+        android:textSize="22sp"/>
+
+    <Button
+        android:id="@+id/btnScanAccess"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="scan access"
+        android:layout_marginTop="20dp"/>
+    <Button
+        android:id="@+id/btnScanDevice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="scan device"/>
+    <Button
+        android:id="@+id/btnDisconnectDevice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="disconnect device"/>
+
+    <ListView
+        android:id="@+id/tvLastData"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="15dp"
+        android:stackFromBottom="true"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="50dp">
+        <EditText
+            android:id="@+id/edtSendData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="22sp"/>
+        <Button
+            android:id="@+id/btnSendData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="send"
+            android:textSize="16sp"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>
