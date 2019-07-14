@@ -6,6 +6,8 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,6 +19,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,8 +28,22 @@ import com.example.sendimagebluetoothsample.bluetooth.BluetoothConstants;
 import com.example.sendimagebluetoothsample.bluetooth.BluetoothService;
 import com.example.sendimagebluetoothsample.bluetooth.DeviceListActivity;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+
+
+    private byte[] tempImageStorage = new byte[213994];
+    private int indexPointer = 0;
+
+    int width;
+    int height;
+    String configName;
+
+    private static final int WRITE_STATE = 21;
+    private static final int FINISH_STATE = 22;
 
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
@@ -34,16 +51,13 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSION_LOCATION = 4;
 
     private TextView tvConnectState;
-    private ListView lvDataIncome;
-    private EditText edtSendData;
     private Button btnSendData;
     private Button btnScanAccess;
     private Button btnScanDevice;
     private Button btnDisconnectDevice;
+    private ImageView ivReceive;
 
     private String mConnectedDeviceName = null;
-    private ArrayAdapter<String> mConversationArrayAdapter;
-    private StringBuffer mOutStringBuffer;
     private BluetoothAdapter mBluetoothAdapter = null;
     private BluetoothService mChatService = null;
 
@@ -97,8 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initView() {
         tvConnectState = findViewById(R.id.tvConnectState);
-        lvDataIncome = findViewById(R.id.tvLastData);
-        edtSendData = findViewById(R.id.edtSendData);
+        ivReceive = findViewById(R.id.ivReceive);
         btnSendData = findViewById(R.id.btnSendData);
         btnScanAccess = findViewById(R.id.btnScanAccess);
         btnScanDevice = findViewById(R.id.btnScanDevice);
@@ -126,39 +139,40 @@ public class MainActivity extends AppCompatActivity {
                 disconnectDevice();
             }
         });
+
+        btnSendData.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                Toast.makeText(MainActivity.this, "" + arr.length, Toast.LENGTH_SHORT).show();
+
+                handler.obtainMessage(WRITE_STATE).sendToTarget();
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i = 0; i < 213994; i+=25) {
+                            for (int j = 0; j < 25; j++) {
+                                temp[j] = arr[i];
+                            }
+                            sendMessage(temp);
+                            if ( i + 25 > 213994)
+                                i -= ((i + 25) - 213994);
+                        }
+                        handler.obtainMessage(FINISH_STATE).sendToTarget();
+                    }
+                }).start();
+            }
+        });
     }
+    byte[] arr = bitmapConvertToByteArray();
+    byte[] temp = new byte[25];
 
     private void setupChat() {
         Log.d(TAG, "setupChat()");
 
-        mConversationArrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.item_data_list);
-        lvDataIncome.setAdapter(mConversationArrayAdapter);
-
-        // Initialize the compose field with a listener for the return key
-        edtSendData.setOnEditorActionListener(mWriteListener);
-
-        // Initialize the send button with a listener that for click events
-        btnSendData.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Send a message using content of the edit text widget
-                byte[] arr;
-                for (int i = 0; i < 10; i++) {
-                    arr = String.valueOf(i).getBytes();
-                    sendMessage(arr);
-                }
-            }
-        });
-
-        // Initialize the BluetoothService to perform bluetooth connections
         mChatService = new BluetoothService(getApplicationContext(), mHandler);
-
-        // Initialize the buffer for outgoing messages
-        mOutStringBuffer = new StringBuffer("");
     }
 
-    /**
-     * Makes this device discoverable for 300 seconds (5 minutes).
-     */
     private void ensureDiscoverable() {
         if (mBluetoothAdapter.getScanMode() !=
                 BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
@@ -176,23 +190,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (data.length > 0) {
             mChatService.write(data);
-
-            mOutStringBuffer.setLength(0);
-            edtSendData.setText(mOutStringBuffer);
         }
     }
-
-    private TextView.OnEditorActionListener mWriteListener
-            = new TextView.OnEditorActionListener() {
-        public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-            // If the action is a key-up event on the return key, send the message
-            if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
-                String message = view.getText().toString();
-//                sendMessage(message);
-            }
-            return true;
-        }
-    };
 
 
     private final Handler mHandler = new Handler() {
@@ -203,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
                             tvConnectState.setText("연결된 기기 : " + mConnectedDeviceName);
-                            mConversationArrayAdapter.clear();
+//                            mConversationArrayAdapter.clear();
                             break;
                         case BluetoothService.STATE_CONNECTING:
                             tvConnectState.setText("연결중..");
@@ -215,17 +214,17 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case BluetoothConstants.MESSAGE_WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    String writeMessage = new String(writeBuf);
-                    writeMessage = byteArrayToHex(writeBuf, writeBuf.length);
-                    mConversationArrayAdapter.add("Me:  " + writeMessage);
+//                    byte[] writeBuf = (byte[]) msg.obj;
+//                    String writeMessage = new String(writeBuf);
+//                    writeMessage = byteArrayToHex(writeBuf, writeBuf.length);
+//                    mConversationArrayAdapter.add("Me:  " + writeMessage);
                     break;
                 case BluetoothConstants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
-                    String readMessage = byteArrayToHex(readBuf, msg.arg1);
-                    mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+//                    String readMessage = byteArrayToHex(readBuf, msg.arg1);
+                    dataSave(readBuf, msg.arg1);
+//                    mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
                     break;
                 case BluetoothConstants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
@@ -306,4 +305,82 @@ public class MainActivity extends AppCompatActivity {
         }
         return data;
     }
+
+    private byte[] bitmapConvertToByteArray() {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.galaxy_gray);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+
+        Log.d(TAG, "parsing...");
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        byte[] imageBytes = byteArrayOutputStream.toByteArray();
+
+        Log.d(TAG, "complete!");
+        return imageBytes;
+    }
+
+    private Bitmap byteArrayToBitmap(byte[] bytes) {
+        Bitmap bitmap = null;
+        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        bytes = null;
+        return bitmap;
+    }
+
+//    private byte[] bitmapConvertToByteArray() {
+//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.galaxy_gray); //비트맵 이미지
+//
+//        width = bitmap.getWidth();
+//        height = bitmap.getHeight();
+//        configName = bitmap.getConfig().name();
+//
+//        int size = bitmap.getRowBytes() * bitmap.getHeight();
+//        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
+//        bitmap.copyPixelsToBuffer(byteBuffer);
+//        return byteBuffer.array();
+//    }
+//
+//    private Bitmap byteArrayToBitmap(byte[] bytes) {
+//        Bitmap bitmap;
+//
+//        Bitmap.Config configBmp = Bitmap.Config.valueOf(configName);
+//        Bitmap bitmap_tmp = Bitmap.createBitmap(width, height, configBmp);
+//
+//        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+//        bitmap_tmp.copyPixelsFromBuffer(buffer);
+//
+//        bitmap = bitmap_tmp;
+//
+//        return bitmap;
+//    }
+
+    private void dataSave(byte[] buffer, int length) {
+        try {
+            for (int i = 0; i < length; i++)
+                tempImageStorage[indexPointer + i] = buffer[i];
+            indexPointer += length;
+        }
+        catch (IndexOutOfBoundsException e) {
+
+        }
+
+        if (indexPointer == 213994) {
+            indexPointer = 0;
+            Bitmap bmp = byteArrayToBitmap(tempImageStorage);
+            ivReceive.setImageBitmap(bmp);
+        }
+    }
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case WRITE_STATE:
+                    ((TextView)findViewById(R.id.tvSendState)).setText("전송중...");
+                    break;
+                case FINISH_STATE:
+                    ((TextView)findViewById(R.id.tvSendState)).setText("전송완료!!");
+                    break;
+            }
+        }
+    };
 }

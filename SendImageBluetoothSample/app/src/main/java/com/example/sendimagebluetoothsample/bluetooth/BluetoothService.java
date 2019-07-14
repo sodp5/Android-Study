@@ -484,19 +484,12 @@ public class BluetoothService {
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
-            int bytes;
+//            int bytes;
 
             // Keep listening to the InputStream while connected
             while (mState == STATE_CONNECTED) {
                 try {
-                    synchronized (this){
-                        // Read from the InputStream
-                        bytes = mmInStream.read(buffer);
-
-                        // Send the obtained bytes to the UI Activity
-                        mHandler.obtainMessage(BluetoothConstants.MESSAGE_READ, bytes, -1, buffer)
-                                .sendToTarget();
-                    }
+                    readBuffer(buffer);
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
@@ -505,11 +498,14 @@ public class BluetoothService {
             }
         }
 
-        /**
-         * Write to the connected OutStream.
-         *
-         * @param buffer The bytes to write
-         */
+        private synchronized void readBuffer(byte[] buffer) throws IOException {
+            int bytes;
+            bytes = mmInStream.read(buffer);
+
+            mHandler.obtainMessage(BluetoothConstants.MESSAGE_READ, bytes, -1, buffer)
+                    .sendToTarget();
+        }
+
         public void write(byte[] buffer) {
             try {
                 mmOutStream.write(buffer);
