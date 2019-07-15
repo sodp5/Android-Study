@@ -13,14 +13,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,21 +24,22 @@ import com.example.sendimagebluetoothsample.bluetooth.BluetoothService;
 import com.example.sendimagebluetoothsample.bluetooth.DeviceListActivity;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
-
-    private byte[] tempImageStorage = new byte[213994];
+    private static final int SIZE = 213994;
+    private byte[] tempImageStorage = new byte[SIZE];
     private int indexPointer = 0;
 
-    int width;
-    int height;
-    String configName;
 
     private static final int WRITE_STATE = 21;
-    private static final int FINISH_STATE = 22;
+    private static final int WRITE_FINISH_STATE = 22;
+    private static final int RECEIVE_STATE = 23;
+    private static final int RECEIVE_FINISH_STATE = 24;
+    private static final int WAIT_STATE = 25;
 
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
@@ -142,30 +138,44 @@ public class MainActivity extends AppCompatActivity {
 
         btnSendData.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
-                Toast.makeText(MainActivity.this, "" + arr.length, Toast.LENGTH_SHORT).show();
+                arr = bitmapConvertToByteArray();
+                temp = new byte[25];
 
                 handler.obtainMessage(WRITE_STATE).sendToTarget();
 
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        for (int i = 0; i < 213994; i+=25) {
-                            for (int j = 0; j < 25; j++) {
-                                temp[j] = arr[i];
+                        for (int i = 0; i < SIZE; i++) {
+                            byteList.add(arr[indexPointer++]);
+                            if(byteList.size() % 25 == 0) {
+                                tempByte = Arrays.copyOf(byteList.toArray(), byteList.size(), Byte[].class);
+                                for (int j = 0; j < tempByte.length; j++) {
+                                    temp[j] = tempByte[j].byteValue();
+                                }
+                                sendMessage(temp);
+                                byteList.clear();
+                            }
+                        }
+                        if (!byteList.isEmpty()) {
+                            tempByte = Arrays.copyOf(byteList.toArray(), byteList.size(), Byte[].class);
+                            for (int j = 0; j < tempByte.length; j++) {
+                                temp[j] = tempByte[j].byteValue();
                             }
                             sendMessage(temp);
-                            if ( i + 25 > 213994)
-                                i -= ((i + 25) - 213994);
+                            byteList.clear();
                         }
-                        handler.obtainMessage(FINISH_STATE).sendToTarget();
+                        indexPointer = 0;
+                        handler.obtainMessage(WRITE_FINISH_STATE).sendToTarget();
                     }
                 }).start();
             }
         });
     }
-    byte[] arr = bitmapConvertToByteArray();
-    byte[] temp = new byte[25];
+    ArrayList<Byte> byteList = new ArrayList<>();
+    byte[] arr;
+    byte[] temp;
+    Byte[] tempByte;
 
     private void setupChat() {
         Log.d(TAG, "setupChat()");
@@ -326,46 +336,29 @@ public class MainActivity extends AppCompatActivity {
         return bitmap;
     }
 
-//    private byte[] bitmapConvertToByteArray() {
-//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.galaxy_gray); //비트맵 이미지
-//
-//        width = bitmap.getWidth();
-//        height = bitmap.getHeight();
-//        configName = bitmap.getConfig().name();
-//
-//        int size = bitmap.getRowBytes() * bitmap.getHeight();
-//        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
-//        bitmap.copyPixelsToBuffer(byteBuffer);
-//        return byteBuffer.array();
-//    }
-//
-//    private Bitmap byteArrayToBitmap(byte[] bytes) {
-//        Bitmap bitmap;
-//
-//        Bitmap.Config configBmp = Bitmap.Config.valueOf(configName);
-//        Bitmap bitmap_tmp = Bitmap.createBitmap(width, height, configBmp);
-//
-//        ByteBuffer buffer = ByteBuffer.wrap(bytes);
-//        bitmap_tmp.copyPixelsFromBuffer(buffer);
-//
-//        bitmap = bitmap_tmp;
-//
-//        return bitmap;
-//    }
-
-    private void dataSave(byte[] buffer, int length) {
+    private synchronized void dataSave(byte[] buffer, int length) {
+        handler.obtainMessage(RECEIVE_STATE).sendToTarget();
         try {
             for (int i = 0; i < length; i++)
                 tempImageStorage[indexPointer + i] = buffer[i];
             indexPointer += length;
         }
         catch (IndexOutOfBoundsException e) {
-
+            e.printStackTrace();
+            indexPointer = SIZE;
         }
 
-        if (indexPointer == 213994) {
+        if (indexPointer == SIZE) {
+            Log.d("herekm", "진입");
+            handler.obtainMessage(RECEIVE_FINISH_STATE).sendToTarget();
             indexPointer = 0;
             Bitmap bmp = byteArrayToBitmap(tempImageStorage);
+            try {
+                Toast.makeText(this, "count : " + bmp.getByteCount(), Toast.LENGTH_SHORT).show();
+            }
+            catch (Exception e) {
+                Toast.makeText(this, "fail", Toast.LENGTH_SHORT).show();
+            }
             ivReceive.setImageBitmap(bmp);
         }
     }
@@ -377,9 +370,19 @@ public class MainActivity extends AppCompatActivity {
                 case WRITE_STATE:
                     ((TextView)findViewById(R.id.tvSendState)).setText("전송중...");
                     break;
-                case FINISH_STATE:
+                case WRITE_FINISH_STATE:
                     ((TextView)findViewById(R.id.tvSendState)).setText("전송완료!!");
                     break;
+                case RECEIVE_STATE:
+                    ((TextView)findViewById(R.id.tvSendState)).setText("수신중...");
+                    break;
+                case RECEIVE_FINISH_STATE:
+                    ((TextView)findViewById(R.id.tvSendState)).setText("수신완료!!");
+                    break;
+                case WAIT_STATE:
+                    ((TextView)findViewById(R.id.tvSendState)).setText("수신대기중");
+                    break;
+
             }
         }
     };
